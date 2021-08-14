@@ -14,27 +14,11 @@
                         v-model="searchText"></b-form-input>
         </b-col>
       </b-row>
-      <b-row>
-        <b-col cols="4">
-          <b-link size="sm" v-b-toggle.collapse-field class="m-1"><small>Search fields</small></b-link>
-          <b-collapse id="collapse-field">
-            <b-form-radio-group
-                v-model="selected"
-                :options="options"
-                class="mb-3"
-                value-field="item"
-                text-field="name"
-                disabled-field="notEnabled"
-                @keydown.enter.native="enterClicked"
-            ></b-form-radio-group>
-          </b-collapse>
-        </b-col>
-        <b-col cols="2">
-        </b-col>
-      </b-row>
       <b-row class="text-black-50">
-        <b-col :cols=title.size v-for="title in titles" :key="title.value">
-          <small>{{ title.value }}</small>
+        <b-col>
+          <small v-if="items" class="text-black-50">Search results: {{ items.length }}</small>
+          <small v-else-if="items === null" class="text-black-50">Search results: 0</small>
+          <small v-else-if="!items" class="text-black-50">Press enter for search</small>
         </b-col>
       </b-row>
       <div class="border-top my-1"></div>
@@ -45,35 +29,41 @@
       </div>
       <b-row v-if="items" style="font-family: 'Deja Vu Sans Mono'; color: #3d3d3d">
         <div>
-          <b-col>
-            <b-row class="py-1"
-                   v-for="item in items"
-                   :key=item.ID
-                   @mouseover="onHoverId = item.ID"
-                   @mouseout="onHoverId = false"
-                   :style="[item.ID === onHoverId ? {'background-color':'#f3f3f3'} : {'background-color':'#ffffff'}]">
+          <b-col cols="8">
+            <b-card v-for="item in items"
+                    :key=item.ID
+                    class="border-0 w-100"
+            >
 
-              <b-col cols="2">
-                {{ item.title }}
-              </b-col>
-              <b-col cols="2">
-                {{ item.author }}
-              </b-col>
-              <b-col cols="1">
-                {{ item.publisher }}
-              </b-col>
-              <b-col cols="4">
-                <div v-if="item.description">
-                  <div @click="showMore(item.ID)" v-if="!readMore[item.ID]">{{
-                      item.description.substring(0, 200) + ".."
-                    }}
-                  </div>
-                  <div @click="showLess(item.ID)" v-if="readMore[item.ID]">{{ item.description }}</div>
-                </div>
-              </b-col>
-            </b-row>
+              <a class="p-1"
+                 v-for="item in ['Python', 'Network']"
+                 :key="item">
+                <b-badge style="font-family: 'Arial';" class="text-white" href="#" variant="info">{{ item }}</b-badge>
+              </a>
+              <h4>{{ item.title }}</h4>
+              <a class="small text-muted">{{ item.author }}</a>
+              <b-card-text>
+                <span v-for="(text, index) in item.text"
+                      :key="index"
+                      v-html="text + ' ... '">
+                </span>
+              </b-card-text>
+            </b-card>
+
+            <!--            <div v-if="item.description">-->
+            <!--              <div @click="showMore(item.ID)" v-if="!readMore[item.ID]">{{-->
+            <!--                  item.description.substring(0, 100) + ".."-->
+            <!--                }}-->
+            <!--              </div>-->
+            <!--              <div @click="showLess(item.ID)" v-if="readMore[item.ID]">{{ item.description }}</div>-->
+            <!--            </div>-->
 
           </b-col>
+        </div>
+      </b-row>
+      <b-row v-else-if="items !== null">
+        <div class="text-center">
+          <p class="text-black-50"><small>No results...</small></p>
         </div>
       </b-row>
     </div>
@@ -84,7 +74,7 @@
 import store from "@/store/store";
 
 export default {
-  name: "Library",
+  name: "ContentLibrary",
 
   data() {
     return {
@@ -96,7 +86,6 @@ export default {
       ],
       searchText: store.getters.searchRequest,
       onHoverId: false,
-      item: {ID: null},
       readMore: [],
       readLess: [],
       isBusy: false,
@@ -106,18 +95,7 @@ export default {
         {value: 'Publisher', size: 1},
         {value: 'Description', size: 4},
       ],
-      tags: ['Apple', 'Orange', 'Banana', 'Lime', 'Peach', 'Chocolate', 'Strawberry'],
-      search: '',
-      value: [],
-      selected: 'title',
-      options: [
-        {item: 'title', name: 'Title', checked: true},
-        {item: 'description', name: 'Description'},
-        {item: 'author', name: 'Author'},
-        {item: 'publisher', name: 'Publisher'},
-        {item: 'soon', name: 'Soon', notEnabled: true},
-      ],
-      items: store.getters.searchResult,
+      items: store.getters.contentSearchResult,
     }
   },
   computed: {
@@ -145,13 +123,17 @@ export default {
   },
   methods: {
     async enterClicked() {
+      this.isBusy = true
       store.state.searchRequest = this.searchText
-      store.state.searchResult = null
+      store.state.contentSearchResult = null
       let params = {}
-      params[this.selected] = this.searchText
-      await this.axios.get("http://localhost/search/",
+      params["q"] = this.searchText
+      params["number_of_fragments"] = 4
+      params["size"] = 35
+      await this.axios.get("http://localhost/content/search/",
           {params: params},).then((response) => {
         this.items = response.data.result
+        this.isBusy = false
       })
     },
     showMore(id) {
@@ -165,5 +147,11 @@ export default {
 </script>
 
 <style scoped>
+::v-deep b {
+  color: #626262;
+}
 
+h4 {
+  margin-bottom: 0;
+}
 </style>

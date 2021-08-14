@@ -1,14 +1,14 @@
 <template>
    <div>
   <b-navbar toggleable="lg" type="light" class="py-1 shadow" style="background-color: #e7e7e7">
-    <b-navbar-brand class="ml-2" href="#">GoLib</b-navbar-brand>
+    <b-navbar-brand to="/" class="ml-2" href="#">GoLib</b-navbar-brand>
 
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar-nav>
-        <b-nav-item to="/">Home</b-nav-item>
         <b-nav-item to="library">Library </b-nav-item>
+        <b-nav-item to="content">Content </b-nav-item>
         <b-nav-item href="#" disabled>Upload</b-nav-item>
       </b-navbar-nav>
 
