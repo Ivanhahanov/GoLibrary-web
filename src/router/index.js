@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Search from "@/components/Search";
 import Library from "@/components/Library";
 import ContentLibrary from "@/components/ContentLibrary";
+import Upload from "@/components/Upload";
 Vue.use(VueRouter)
 
 const routes = [
@@ -20,6 +21,11 @@ const routes = [
         path: '/content',
         name: 'ContentLibrary',
         component: ContentLibrary
+    },
+    {
+        path: '/upload',
+        name: 'Upload',
+        component: Upload
     },
 ]
 
