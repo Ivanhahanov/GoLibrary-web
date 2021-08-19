@@ -52,14 +52,13 @@
                    @mouseover="onHoverId = item.ID"
                    @mouseout="onHoverId = false"
                    :style="[item.ID === onHoverId ? {'background-color':'#f3f3f3'} : {'background-color':'#ffffff'}]">
-
-              <b-col cols="2">
+              <b-col cols="2" v-b-toggle="item.ID">
                 {{ item.title }}
               </b-col>
-              <b-col cols="2">
+              <b-col cols="2" v-b-toggle="item.ID">
                 {{ item.author }}
               </b-col>
-              <b-col cols="1">
+              <b-col cols="1" v-b-toggle="item.ID">
                 {{ item.publisher }}
               </b-col>
               <b-col cols="4">
@@ -71,8 +70,42 @@
                   <div @click="showLess(item.ID)" v-if="readMore[item.ID]">{{ item.description }}</div>
                 </div>
               </b-col>
-            </b-row>
+              <b-sidebar
+                  :id="item.ID"
+                  width="40%"
+                  no-header
+                  backdrop
+                  shadow
+                  right
+              >
+                <div class="p-3">
+                  <b-card class="text-left">
 
+
+                    <div class="d-inline-block">
+                      <div class="text-black-50"><small>title</small></div>
+                      <h4 id="sidebar">{{ item.title }}</h4>
+                    </div>
+                    <div class="ml-2 d-inline-block">
+                      <b-button @click="download(item.ID, item.slug)" size="sm" variant="outline">
+                        <b-icon scale="1" icon="download"></b-icon>
+                      </b-button>
+                    </div>
+                    <div class="text-black-50"><small>author</small></div>
+                    <p>{{ item.author }}</p>
+
+                    <div class="text-black-50"><small>publisher</small></div>
+                    <p>{{ item.publisher }}</p>
+
+                    <div class="text-black-50"><small>description</small></div>
+                    <p>{{ item.description }}</p>
+                    <b-button @click="download(item.ID, item.slug)" variant="outline-primary">
+                      Download
+                    </b-button>
+                  </b-card>
+                </div>
+              </b-sidebar>
+            </b-row>
           </b-col>
         </div>
       </b-row>
@@ -160,6 +193,24 @@ export default {
     showLess(id) {
       this.$set(this.readMore, id, false);
     },
+    download(fileId, filename) {
+      let url = 'http://localhost/download/' + fileId
+      this.axios({
+        url: url,
+        method: "GET",
+        responseType: 'blob',
+      }).then((response) => {
+        let fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        let fileLink = document.createElement('a')
+
+        fileLink.href = fileURL
+        fileLink.setAttribute('download', filename)
+        fileLink.setAttribute('from', 'god')
+        document.body.appendChild(fileLink);
+
+        fileLink.click();
+      });
+    }
   }
 }
 </script>
