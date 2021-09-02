@@ -6,8 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
         searchRequest: window.localStorage.getItem('searchRequest'),
-        searchResult : window.localStorage.getItem('searchResult'),
-        contentSearchResult: window.localStorage.getItem('contentSearchResult'),
+        searchResult : null
     },
 
     mutations: {
@@ -19,10 +18,6 @@ export default new Vuex.Store({
             state.searchResult = value;
             window.localStorage.setItem('searchResult', value);
         },
-        ContentSearchResult: (state, value) => {
-            state.contentSearchResult = value;
-            window.localStorage.setItem('contentSearchResult', value);
-        },
     },
 
     getters: {
@@ -32,9 +27,6 @@ export default new Vuex.Store({
         searchResult: state => {
             return state.searchResult;
         },
-        contentSearchResult: state => {
-            return state.contentSearchResult
-        }
     },
 
     actions: {

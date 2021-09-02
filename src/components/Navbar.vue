@@ -7,8 +7,7 @@
 
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
-          <b-nav-item to="library">Library</b-nav-item>
-          <b-nav-item to="content">Content</b-nav-item>
+          <b-nav-item to="content">Search</b-nav-item>
           <b-nav-item to="upload">Upload</b-nav-item>
         </b-navbar-nav>
 

@@ -29,37 +29,66 @@
       </div>
       <b-row v-if="items" style="font-family: 'Deja Vu Sans Mono'; color: #3d3d3d">
         <div>
-          <b-col cols="8">
+          <b-col cols="6">
             <b-card v-for="item in items"
-                    :key=item.ID
-                    class="border-0 w-100"
+                    :key=item.slug
+                    class="border-0"
+                    style="width: 60rem;"
             >
-
               <a class="p-1"
                  v-for="item in ['Python', 'Network']"
                  :key="item">
                 <b-badge style="font-family: 'Arial';" class="text-white" href="#" variant="info">{{ item }}</b-badge>
               </a>
-              <h4>{{ item.title }}</h4>
+              <a v-b-toggle="item.slug"><h4>{{ item.title }}</h4></a>
               <a class="small text-muted">{{ item.author }}</a>
               <b-card-text>
-                <span v-for="(text, index) in item.text"
-                      :key="index"
-                      v-html="text + ' ... '">
-                </span>
+                <a v-for="(text, index) in item.text"
+                   :key="index"
+                   class="text-body"
+                   v-b-toggle="item.slug"
+                   v-html="text.page + text.text + ' ... '">
+                </a>
               </b-card-text>
+              <b-sidebar
+                  :id="item.slug"
+                  width="40%"
+                  no-header
+                  backdrop
+                  shadow
+                  right
+              >
+                <div class="p-3">
+                  <b-card class="text-left">
+
+
+                    <div class="d-inline-block">
+                      <div class="text-black-50"><small>title</small></div>
+                      <h4 id="sidebar">{{ item.title }}</h4>
+                    </div>
+                    <div class="d-inline-block">
+                      <b-button @click="download(item.slug)" size="sm" variant="outline">
+                        <b-icon scale="1" icon="download"></b-icon>
+                      </b-button>
+                    </div>
+                    <div class="text-black-50"><small>author</small></div>
+                    <p>{{ item.author }}</p>
+
+                    <div class="text-black-50"><small>publisher</small></div>
+                    <p>{{ item.publisher }}</p>
+
+                    <div class="text-black-50"><small>description</small></div>
+                    <p>{{ item.description }}</p>
+                    <b-button @click="download(item.slug)" variant="outline-primary">
+                      Download
+                    </b-button>
+                  </b-card>
+                </div>
+              </b-sidebar>
             </b-card>
-
-            <!--            <div v-if="item.description">-->
-            <!--              <div @click="showMore(item.ID)" v-if="!readMore[item.ID]">{{-->
-            <!--                  item.description.substring(0, 100) + ".."-->
-            <!--                }}-->
-            <!--              </div>-->
-            <!--              <div @click="showLess(item.ID)" v-if="readMore[item.ID]">{{ item.description }}</div>-->
-            <!--            </div>-->
-
           </b-col>
         </div>
+
       </b-row>
       <b-row v-else-if="items !== null">
         <div class="text-center">
@@ -86,8 +115,6 @@ export default {
       ],
       searchText: store.getters.searchRequest,
       onHoverId: false,
-      readMore: [],
-      readLess: [],
       isBusy: false,
       titles: [
         {value: 'Title', size: 2},
@@ -95,53 +122,46 @@ export default {
         {value: 'Publisher', size: 1},
         {value: 'Description', size: 4},
       ],
-      items: store.getters.contentSearchResult,
-    }
-  },
-  computed: {
-    criteria() {
-      // Compute the search criteria
-      return this.search.trim().toLowerCase()
-    },
-    availableOptions() {
-      const criteria = this.criteria
-      // Filter out already selected
-      const tags = this.tags.filter(opt => this.value.indexOf(opt) === -1)
-      if (criteria) {
-        // Show only options that match criteria
-        return tags.filter(opt => opt.toLowerCase().indexOf(criteria) > -1);
-      }
-      // Show all tags available
-      return tags
-    },
-    searchDesc() {
-      if (this.criteria && this.availableOptions.length === 0) {
-        return 'There are no tags matching your search criteria'
-      }
-      return ''
+      items: store.getters.searchResult,
     }
   },
   methods: {
     async enterClicked() {
       this.isBusy = true
       store.state.searchRequest = this.searchText
-      store.state.contentSearchResult = null
+      store.state.searchResult = null
       let params = {}
       params["q"] = this.searchText
-      params["number_of_fragments"] = 4
-      params["size"] = 35
+      params["num_of_fragments"] = 4
+      params["lang"] = "en"
+      params["size"] = 50
       await this.axios.get("http://localhost/content/search/",
           {params: params},).then((response) => {
         this.items = response.data.result
+        console.log(response.data.result)
         this.isBusy = false
       })
     },
-    showMore(id) {
-      this.$set(this.readMore, id, true);
+    render(){
     },
-    showLess(id) {
-      this.$set(this.readMore, id, false);
-    },
+    download(slug) {
+      let url = 'http://localhost/download/' + slug
+      this.axios({
+        url: url,
+        method: "GET",
+        responseType: 'blob',
+      }).then((response) => {
+        let fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        let fileLink = document.createElement('a')
+
+        fileLink.href = fileURL
+        fileLink.setAttribute('download', slug)
+        fileLink.setAttribute('from', 'god')
+        document.body.appendChild(fileLink);
+
+        fileLink.click();
+      });
+    }
   }
 }
 </script>
