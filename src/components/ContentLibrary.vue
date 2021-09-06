@@ -10,8 +10,11 @@
       </b-row>
       <b-row class="py-1">
         <b-col cols="5">
-          <b-form-input @keydown.enter.native="enterClicked" type="text" size="sm" placeholder="Search for..."
-                        v-model="searchText"></b-form-input>
+          <b-form-input @keydown.enter.native="enterClicked" list="my-list-id" type="text" size="sm" placeholder="Search for..."
+                        v-model="searchText" v-on:input="Autocomplete(searchText)"></b-form-input>
+          <datalist id="my-list-id">
+            <option v-for="title in titles" :key="title">{{ title }}</option>
+          </datalist>
         </b-col>
       </b-row>
       <b-row class="text-black-50">
@@ -35,21 +38,37 @@
                     class="border-0"
                     style="width: 60rem;"
             >
-              <a class="p-1"
-                 v-for="item in ['Python', 'Network']"
-                 :key="item">
-                <b-badge style="font-family: 'Arial';" class="text-white" href="#" variant="info">{{ item }}</b-badge>
-              </a>
               <a v-b-toggle="item.slug"><h4>{{ item.title }}</h4></a>
               <a class="small text-muted">{{ item.author }}</a>
               <b-card-text>
-                <a v-for="(text, index) in item.text"
-                   :key="index"
+                <a v-for="text in item.text"
+                   :key="text.page"
                    class="text-body"
-                   v-b-toggle="item.slug"
-                   v-html="text.page + text.text + ' ... '">
+                   v-b-toggle="item.slug+text.page"
+                   @click="render(item.slug, text.page)"
+                   v-html="text.text + ' ... '">
                 </a>
               </b-card-text>
+              <div v-for="text in item.text"
+                   :key="text.page">
+                <b-sidebar
+                    :id="item.slug+text.page"
+                    width="40%"
+                    no-header
+                    backdrop
+                    shadow
+                    right
+                >
+                  <div class="p-3">
+                    <pdf v-for="i in pageCount"
+                         :key="i"
+                         :src="pdfsrc"
+                         :page="i">
+
+                    </pdf>
+                  </div>
+                </b-sidebar>
+              </div>
               <b-sidebar
                   :id="item.slug"
                   width="40%"
@@ -101,10 +120,13 @@
 
 <script>
 import store from "@/store/store";
+import pdf from "vue-pdf";
 
 export default {
   name: "ContentLibrary",
-
+  components: {
+    pdf
+  },
   data() {
     return {
       selectedCategory: "Books",
@@ -116,12 +138,9 @@ export default {
       searchText: store.getters.searchRequest,
       onHoverId: false,
       isBusy: false,
-      titles: [
-        {value: 'Title', size: 2},
-        {value: 'Author', size: 2},
-        {value: 'Publisher', size: 1},
-        {value: 'Description', size: 4},
-      ],
+      pdfsrc: "",
+      pageCount: 3,
+      titles: [],
       items: store.getters.searchResult,
     }
   },
@@ -133,7 +152,7 @@ export default {
       let params = {}
       params["q"] = this.searchText
       params["num_of_fragments"] = 4
-      params["lang"] = "en"
+      params["lang"] = "ru"
       params["size"] = 50
       await this.axios.get("http://localhost/content/search/",
           {params: params},).then((response) => {
@@ -142,7 +161,34 @@ export default {
         this.isBusy = false
       })
     },
-    render(){
+    Autocomplete(text){
+        this.axios.get("http://localhost/content/autocomplete/", {
+          params: {q: text, lang: "ru"}
+        }).then((response) => {
+          this.titles = response.data.result
+          console.log(response.data.result)
+        })
+    },
+    render(slug, page) {
+      this.axios.get("http://localhost/content/part/", {
+        method: "GET",
+        params: {page: page, slug: slug},
+        responseType: "blob"
+      }).then(response => {
+        console.log("Success", response);
+        const blob = new Blob([response.data]);
+        const objectUrl = URL.createObjectURL(blob);
+        this.pdfsrc = objectUrl;
+      })
+    },
+    base64ToArrayBuffer(base64) {
+      var binary_string = window.atob(base64);
+      var len = binary_string.length;
+      var bytes = new Uint8Array(len);
+      for (var i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+      }
+      return bytes.buffer;
     },
     download(slug) {
       let url = 'http://localhost/download/' + slug

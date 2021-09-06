@@ -67,7 +67,7 @@
           :fields="fields"
       >
         <template #cell(actions)="row">
-          <b-button size="sm" variant="outline-danger" @click="removeBook(row.item.ID)" class="mr-2">
+          <b-button size="sm" variant="outline-danger" @click="removeBook(row.item.slug)" class="mr-2">
             Remove
           </b-button>
         </template>
