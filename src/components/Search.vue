@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid" style="background-color: #e7e7e7; min-height: 95vh; width: 100%">
+  <div class="container-fluid" style="background-color: #eeeeee; min-height: 95vh">
     <div class="row align-items-center" style="min-height: calc(100vh - 350px);">
       <div class="col-7 mx-auto">
         <div>
@@ -64,7 +64,7 @@ export default {
     async enterClicked() {
       store.state.searchRequest = this.searchText
       store.state.searchResult = null
-      await this.axios.get("http://localhost/content/search/", {params: {q:this.searchText}},).then((response) => {
+      await this.axios.get("/content/search/", {params: {q:this.searchText}},).then((response) => {
         store.commit('SearchResult',  response.data.result)
         this.$router.push('content')
       })

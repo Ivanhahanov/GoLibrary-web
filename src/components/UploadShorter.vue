@@ -21,7 +21,7 @@
           :fields="fields"
       >
         <template #cell(short_name)="data">
-          <b-link :href="'http://localhost/' + data.value">http://localhost/{{ data.value }}</b-link>
+          <b-link :href="hostname + data.value">{{ hostname }}/{{ data.value }}</b-link>
         </template>
       </b-table>
     </div>
@@ -34,6 +34,7 @@ export default {
   name: "UploadShorter",
   data() {
     return {
+      hostname: "http://s.example.com/",
       original_link: "",
       fields: [
         {
@@ -56,12 +57,12 @@ export default {
   },
   methods: {
     async getShortLinks() {
-      await this.axios.get("http://localhost/link/",).then((response) => {
+      await this.axios.get("/link/",).then((response) => {
         this.items = response.data.result
       })
     },
     async addShortLink() {
-      await this.axios.post("http://localhost/link/create/", {'original_link': this.original_link}).then((response) => {
+      await this.axios.post("/link/create/", {'original_link': this.original_link}).then((response) => {
         this.items = response.data.result
         this.getShortLinks()
       })

@@ -108,18 +108,18 @@ export default {
       formData.append('publisher', this.publisher)
       formData.append('description', this.description)
       console.log(formData.get('file'))
-      this.axios.put("http://localhost/books/", formData).then((response) => {
+      this.axios.put("/books/", formData).then((response) => {
         console.log(response.data)
         this.getBooks()
       })
     },
     async getBooks() {
-      await this.axios.get("http://localhost/books/").then((response) => {
+      await this.axios.get("/books/").then((response) => {
         this.items = response.data.books
       })
     },
     async removeBook(bookId) {
-      await this.axios.delete("http://localhost/books/"+bookId).then((response) => {
+      await this.axios.delete("/books/"+bookId).then((response) => {
         this.items = response.data.books
         this.getBooks()
       })

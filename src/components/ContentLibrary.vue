@@ -53,7 +53,7 @@
                    :key="text.page">
                 <b-sidebar
                     :id="item.slug+text.page"
-                    width="40%"
+                    width="55%"
                     no-header
                     backdrop
                     shadow
@@ -154,7 +154,7 @@ export default {
       params["num_of_fragments"] = 4
       params["lang"] = "ru"
       params["size"] = 50
-      await this.axios.get("http://localhost/content/search/",
+      await this.axios.get("/content/search/",
           {params: params},).then((response) => {
         this.items = response.data.result
         console.log(response.data.result)
@@ -162,7 +162,7 @@ export default {
       })
     },
     Autocomplete(text){
-        this.axios.get("http://localhost/content/autocomplete/", {
+        this.axios.get("/content/autocomplete/", {
           params: {q: text, lang: "ru"}
         }).then((response) => {
           this.titles = response.data.result
@@ -170,7 +170,7 @@ export default {
         })
     },
     render(slug, page) {
-      this.axios.get("http://localhost/content/part/", {
+      this.axios.get("/content/part/", {
         method: "GET",
         params: {page: page, slug: slug},
         responseType: "blob"
@@ -191,7 +191,7 @@ export default {
       return bytes.buffer;
     },
     download(slug) {
-      let url = 'http://localhost/download/' + slug
+      let url = '/download/' + slug
       this.axios({
         url: url,
         method: "GET",
@@ -217,7 +217,5 @@ export default {
   color: #626262;
 }
 
-h4 {
-  margin-bottom: 0;
-}
+
 </style>
