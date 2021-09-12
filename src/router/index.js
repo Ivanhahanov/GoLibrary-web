@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Search from "@/components/Search";
 import ContentLibrary from "@/components/ContentLibrary";
 import Upload from "@/components/Upload";
+
 Vue.use(VueRouter)
 
 const routes = [

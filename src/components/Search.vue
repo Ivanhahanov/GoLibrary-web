@@ -64,8 +64,8 @@ export default {
     async enterClicked() {
       store.state.searchRequest = this.searchText
       store.state.searchResult = null
-      await this.axios.get("/content/search/", {params: {q:this.searchText}},).then((response) => {
-        store.commit('SearchResult',  response.data.result)
+      await this.axios.get("/content/search/", {params: {q: this.searchText}},).then((response) => {
+        store.commit('SearchResult', response.data.result)
         this.$router.push('content')
       })
 
